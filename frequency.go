@@ -15,7 +15,7 @@ type Frequency struct {
 
 	busyAfter int // 忙碌阈值
 
-	waves        []WaveBand // 波段将频率分割成10个波段 /100ms
+	waves        []WaveBand // 波段
 	waveIndex    int        // 波段索引
 	waveSize     int        // 波长
 	wavePartTime int        // 波的单位时长 mrocs 微妙
