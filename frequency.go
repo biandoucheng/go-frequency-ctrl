@@ -7,7 +7,7 @@ import (
 
 // 频率
 type Frequency struct {
-	sync.RWMutex // 写锁
+	sync.RWMutex // 读写锁
 
 	hertz  int // 赫兹，频率，每秒次数
 	status int // 状态 0 正常，1 忙碌的，2 禁止访问
@@ -19,12 +19,18 @@ type Frequency struct {
 	waveIndex    int        // 波段索引
 	waveSize     int        // 波长
 	wavePartTime int        // 波的单位时长 mrocs 微妙
+
+	stat FrequencyStat // 统计
 }
 
 // 初始化频率控制器
 func (f *Frequency) Init(hz int) {
 	defer f.Unlock()
 	f.Lock()
+
+	// 初始化频率统计
+	f.stat = FrequencyStat{}
+	go f.stat.Tricker()
 
 	// 初始化名称频率
 	f.hertz = hz
@@ -68,7 +74,6 @@ func (f *Frequency) Init(hz int) {
 		w.Init(tmp)
 		f.waves[i] = w
 	}
-
 }
 
 // 是否禁止访问
@@ -76,25 +81,16 @@ func (f *Frequency) IsForbidden() bool {
 	return IsFForbidden(f.status)
 }
 
-// 设置正常状态
-func (f *Frequency) SetNormal() {
-	f.status = fStatusNormal
-}
-
-// 设置忙碌
-func (f *Frequency) SetBusy() {
-	f.status = fStatusBusy
-}
-
-// 设置禁止访问
-func (f *Frequency) SetForbidden() {
-	f.status = fStatusForbidden
-}
-
 // 访问
 func (f *Frequency) Access() bool {
+	// 通过状态
+	pass := false
 	// 加锁
-	defer f.Unlock()
+	defer func(pass *bool) {
+		// 记录
+		f.stat.Stat(*pass, f.status, f.waves[f.waveIndex].status)
+		f.Unlock()
+	}(&pass)
 	f.Lock()
 
 	// 访问禁止
@@ -108,22 +104,30 @@ func (f *Frequency) Access() bool {
 	// 当前波段判断
 	if f.waves[idx].Access() {
 		f.count += 1
+		pass = true
 		return true
 	}
 
 	bfidx := idx - 1
 	if bfidx > 0 && f.waves[bfidx].Access() {
 		f.count += 1
+		pass = true
 		return true
 	}
 
 	afidx := idx + 1
 	if afidx+1 <= f.waveSize && f.waves[afidx].Access() {
 		f.count += 1
+		pass = true
 		return true
 	}
 
 	return false
+}
+
+// 返回统计信息
+func (f *Frequency) Describe() FrequencyDescribe {
+	return f.stat.Describe()
 }
 
 // 定时器完成一系列重置工作
@@ -158,16 +162,16 @@ func (f *Frequency) Tricker() {
 
 			// 重置计数
 			f.count = 0
-			f.SetNormal()
+			f.status = fStatusNormal
 		} else {
 			// 判断频率是否超了
 			if f.count > f.hertz {
-				f.SetForbidden()
+				f.status = fStatusForbidden
 			}
 
 			// 忙碌判断
 			if f.count > f.busyAfter {
-				f.SetBusy()
+				f.status = fStatusBusy
 			}
 
 			f.waveIndex += 1

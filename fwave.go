@@ -34,21 +34,6 @@ func (w *WaveBand) IsForbidden() bool {
 	return IsVForbidden(w.status)
 }
 
-// 设置为正常的
-func (w *WaveBand) SetValid() {
-	w.status = vStatusNormal
-}
-
-// 设置为忙碌的
-func (w *WaveBand) SetBusy() {
-	w.status = vStatusBusy
-}
-
-// 设置为不可访问的
-func (w *WaveBand) SetForbidden() {
-	w.status = vStatusForbidden
-}
-
 // 判断可访问性没，并递减值
 func (w *WaveBand) Access() bool {
 	if w.IsForbidden() {
@@ -56,7 +41,7 @@ func (w *WaveBand) Access() bool {
 	}
 
 	if w.value <= w.count {
-		w.SetForbidden()
+		w.status = vStatusForbidden
 		return false
 	}
 

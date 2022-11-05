@@ -18,21 +18,21 @@ func TestFrequencyInitValuue(t *testing.T) {
 
 func TestFrequencyAccess(t *testing.T) {
 	fq := freq.Frequency{}
-	fq.Init(100)
+	fq.Init(50)
 	go fq.Tricker()
 
 	success := 0
-	for i := 0; i < 200; i++ {
+	for i := 0; i < 2000; i++ {
 		ok := fq.Access()
 		if ok {
 			success += 1
 		}
-		fmt.Println("访问接受 >>", i, ok)
-		time.Sleep(time.Millisecond * 2)
-	}
+		time.Sleep(time.Millisecond * 5)
 
-	fmt.Printf("%+v", fq)
-	fmt.Println("")
-	fmt.Println("当前时间戳 >>", time.Now().Unix())
-	fmt.Println("请求成功数 >>", success)
+		if i%500 == 0 {
+			desc := fq.Describe()
+			fmt.Println(desc.ToString())
+			fmt.Println("+_+_+_+_+_+_+_+_+_+_+_+_+_+_+")
+		}
+	}
 }

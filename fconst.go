@@ -25,6 +25,18 @@ func IsFBusy(st int) bool {
 	return st == fStatusBusy
 }
 
+// 状态转字符串
+func FStatusToString(st int) string {
+	switch st {
+	case fStatusNormal:
+		return "NORMAL"
+	case fStatusBusy:
+		return "BUSY"
+	default:
+		return "FORBIDDEN"
+	}
+}
+
 // 波段状态 1 正常的，2 忙碌的，3 禁止访问
 const (
 	// 无效状态
@@ -55,4 +67,18 @@ func IsVBusy(st int) bool {
 // 是否禁止的
 func IsVForbidden(st int) bool {
 	return st == vStatusForbidden
+}
+
+// 状态转字符串
+func VStatusToString(st int) string {
+	switch st {
+	case vStatusInvalid:
+		return "INVALID"
+	case vStatusNormal:
+		return "NORMAL"
+	case vStatusBusy:
+		return "BUSY"
+	default:
+		return "FORBIDDEN"
+	}
 }
