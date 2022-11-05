@@ -144,7 +144,7 @@ FrequencyDescribe.ToString() 以字符串形式输出统计信息。
 ```
 
 ## 使用方法
-[示例代码 <https://github.com/biandoucheng/open-example/tree/main/go-frequency-ctrl>](https://github.com/biandoucheng/open-example/tree/main/go-frequency-ctrl-example)
+[示例代码 <https://github.com/biandoucheng/open-example/tree/main/go-frequency-ctrl-example>](https://github.com/biandoucheng/open-example/tree/main/go-frequency-ctrl-example)
 
 ```
 import (
