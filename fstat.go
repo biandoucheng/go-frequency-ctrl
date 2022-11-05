@@ -19,7 +19,7 @@ type FrequencyStat struct {
 	FWStatus int // 频控波段状态  (1~10)ms 级
 }
 
-// 做索引重置和
+// 做索引重置
 func (f *FrequencyStat) Tricker() {
 	tricker := time.NewTicker(time.Second * 1)
 	second := 0
@@ -52,6 +52,9 @@ func (f *FrequencyStat) Tricker() {
 }
 
 func (f *FrequencyStat) Describe() FrequencyDescribe {
+	defer f.RUnlock()
+	f.RLock()
+
 	desc := FrequencyDescribe{}
 
 	// 1 秒钟统计
@@ -87,6 +90,8 @@ func (f *FrequencyStat) Describe() FrequencyDescribe {
 
 // 统计
 func (f *FrequencyStat) Stat(pass bool, fst, fwst int) {
+	f.Lock()
+
 	f.SecondAccessStats[0] += 1
 	f.FTSecondAccessStats[0] += 1
 
@@ -97,4 +102,6 @@ func (f *FrequencyStat) Stat(pass bool, fst, fwst int) {
 
 	f.FStatus = fst
 	f.FWStatus = fwst
+
+	f.Unlock()
 }
